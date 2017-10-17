@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   struct RGBLedMatrix *matrix;
   struct LedCanvas *offscreen_canvas;
   int width, height;
-  int x, y, i;
+  int x, y, i, j, k, d;
 
   memset(&options, 0, sizeof(options));
   options.rows = 32;
@@ -36,6 +36,8 @@ int main(int argc, char **argv) {
   fprintf(stderr, "Size: %dx%d. Hardware gpio mapping: %s\n",
           width, height, options.hardware_mapping);
 
+  j = 0;
+  k = 0;
   for (i = 0; i < 1000; ++i) {
     for (y = 0; y < height; ++y) {
       for (x = 0; x < width; ++x) {
@@ -43,6 +45,40 @@ int main(int argc, char **argv) {
       }
     }
 
+    if( d == 0 ){
+      if(j > 0){
+        --j;
+      }
+      else{
+        d = change_direction(d);
+      }
+    }
+    if( d == 1 ){ 
+      if( k > 0 ){
+        --k;
+      }
+      else{
+        d = change_direction(d);       
+      }
+    }
+    if( d == 2 ){
+      if( j < height ){
+        ++j; 
+      }
+      else{
+        d = change_direction(d);
+      }
+    }
+    if( d == 3 ){
+      if( k < width ){
+        ++k;
+      }
+      else{
+        d = change_direction(d);
+      }
+    }
+    
+    led_canvas_set_pixel(offscreen_canvas, j, k, 100, 100, 100);
     /* Now, we swap the canvas. We give swap_on_vsync the buffer we
      * just have drawn into, and wait until the next vsync happens.
      * we get back the unused buffer to which we'll draw in the next
@@ -58,4 +94,32 @@ int main(int argc, char **argv) {
   led_matrix_delete(matrix);
 
   return 0;
+}
+int change_direction(int current_direction){
+  int n, new_direction;
+  int direction_array[3];
+  
+  if(current_direction == 0){
+    direction_array[0] = 1;
+    direction_array[1] = 2;
+    direction_array[2] = 3;
+  }
+  if(current_direction == 1){
+    direction_array[0] = 0;
+    direction_array[1] = 2;
+    direction_array[2] = 3;
+  }
+  if(current_direction == 2){
+    direction_array[0] = 0;
+    direction_array[1] = 1;
+    direction_array[2] = 3;
+  }
+  if(current_direction == 3){
+    direction_array[0] = 0;
+    direction_array[1] = 1;
+    direction_array[2] = 2;
+  }
+  n = rand() % 3;
+  new_direction = direction_array[n];
+  return(new_direction);
 }
